@@ -53,8 +53,8 @@ function setupScene(font, scene, camera, renderer, containerRef) {
 
   const textContents = [
     { content: "Hey! I'm Manuel.", size: 40 },
-    { content: "", size: 10 },
-    { content: "", size: 10 },
+    { content: "", size: 20 },
+    { content: "", size: 20 },
     { content: "My projects", size: 40 },
     { content: "• Renderer From Scratch", size: 20 },
     { content: "• Gym Tracking App", size: 20 },
