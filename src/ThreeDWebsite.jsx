@@ -70,20 +70,47 @@ function setupScene(font, scene, camera, renderer, containerRef) {
     textMesh.position.y = index * -40;
 
     scene.add(textMesh);
-    return textMesh;
+
+    const boundingBox = new THREE.Box3().setFromObject(textMesh);
+    const dimensions = new THREE.Vector3();
+    boundingBox.getSize(dimensions);
+    const boxGeometry = new THREE.BoxGeometry(
+      dimensions.x,
+      dimensions.y,
+      dimensions.z
+    );
+
+    const boundingBoxMesh = new THREE.Mesh(
+      boxGeometry,
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    boundingBoxMesh.position.copy(boundingBox.getCenter(new THREE.Vector3()));
+
+    scene.add(boundingBoxMesh);
+
+    return { textMesh: textMesh, boundingMesh: boundingBoxMesh };
   });
+
   //const cubeMesh = createCubeMesh(40, 40, 40, 0, 120, 0);
   //scene.add(cubeMesh);
 
   const torusKnot = createTorusMesh(0, 80, 0);
   scene.add(torusKnot);
 
-  const boundingBox = calculateBoundingBox([...textMeshes, torusKnot]);
+  const boundingBox = calculateBoundingBox([
+    ...textMeshes.map((meshObj) => meshObj.textMesh),
+    torusKnot,
+  ]);
 
   // add orbit controls
   const controls = setupCamera(boundingBox, camera, containerRef);
 
   handleWindowResize(camera, renderer);
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  // add text hover effect
+  handleTextHover(textMeshes, raycaster, mouse, camera);
 
   const animate = () => {
     requestAnimationFrame(animate);
@@ -99,6 +126,27 @@ function setupScene(font, scene, camera, renderer, containerRef) {
 
   // Animation loop
   animate(controls);
+}
+
+function handleTextHover(textMeshes, raycaster, mouse, camera) {
+  const handleMouseMove = (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; // invert y coords
+
+    raycaster.setFromCamera(mouse, camera);
+
+    for (let textMeshObj of textMeshes) {
+      const intersect = raycaster.intersectObject(textMeshObj.boundingMesh);
+
+      if (intersect.length > 0) {
+        textMeshObj.textMesh.material.color.set(0xff0000); // Change color to red (you can set any color you want)
+      } else {
+        textMeshObj.textMesh.material.color.set(0x000000); // Change back to original color
+      }
+    }
+  };
+
+  window.addEventListener("mousemove", handleMouseMove);
 }
 
 function createTextMesh(font, textToRender, fontSize) {
