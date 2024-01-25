@@ -56,7 +56,11 @@ function setupScene(font, scene, camera, renderer, containerRef) {
     { content: "", size: 20 },
     { content: "", size: 20 },
     { content: "My projects", size: 40 },
-    { content: "• Renderer From Scratch", size: 20 },
+    {
+      content: "• Renderer From Scratch",
+      size: 20,
+      url: "https://github.com/ltJustWorks/renderer_from_scratch",
+    },
     { content: "• Gym Tracking App", size: 20 },
     { content: "", size: 20 },
     { content: "", size: 20 },
@@ -65,6 +69,12 @@ function setupScene(font, scene, camera, renderer, containerRef) {
 
   const textMeshes = textContents.map((textObj, index) => {
     const textMesh = createTextMesh(font, textObj.content, textObj.size);
+
+    // add hyperlink functionality
+    if (textObj.url) {
+      textMesh.userData.url = textObj.url;
+      textMesh.cursor = "pointer"; // Change cursor to pointer when hovering over text
+    }
 
     // Position the text meshes in a row
     textMesh.position.y = index * -40;
@@ -111,6 +121,7 @@ function setupScene(font, scene, camera, renderer, containerRef) {
   const mouse = new THREE.Vector2();
   // add text hover effect
   handleTextHover(textMeshes, raycaster, mouse, camera);
+  handleTextClick(textMeshes, raycaster, mouse, camera);
 
   const animate = () => {
     requestAnimationFrame(animate);
@@ -147,6 +158,26 @@ function handleTextHover(textMeshes, raycaster, mouse, camera) {
   };
 
   window.addEventListener("mousemove", handleMouseMove);
+}
+
+function handleTextClick(textMeshes, raycaster, mouse, camera) {
+  const handleClick = (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; // invert y coords
+
+    raycaster.setFromCamera(mouse, camera);
+
+    for (let textMeshObj of textMeshes) {
+      const intersect = raycaster.intersectObject(textMeshObj.boundingMesh);
+
+      if (intersect.length > 0) {
+        if (textMeshObj.textMesh.userData.url)
+          window.open(textMeshObj.textMesh.userData.url);
+      }
+    }
+  };
+
+  window.addEventListener("click", handleClick);
 }
 
 function createTextMesh(font, textToRender, fontSize) {
