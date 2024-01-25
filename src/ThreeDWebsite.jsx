@@ -3,7 +3,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
-import font from "/fonts/helvetiker_regular.typeface.json";
 
 const ThreeDWebsite = () => {
   const containerRef = useRef();
@@ -59,6 +58,9 @@ function setupScene(font, scene, camera, renderer, containerRef) {
     { content: "My projects", size: 40 },
     { content: "• Renderer From Scratch", size: 20 },
     { content: "• Gym Tracking App", size: 20 },
+    { content: "", size: 20 },
+    { content: "", size: 20 },
+    { content: "More to come :3", size: 20 },
   ];
 
   const textMeshes = textContents.map((textObj, index) => {
@@ -140,7 +142,7 @@ function setupCamera(boundingBox, camera, containerRef) {
     maxSize / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
 
   camera.position.copy(center);
-  camera.position.z += distance;
+  camera.position.z += distance * 1.25;
 
   const controls = new OrbitControls(camera, containerRef.current);
   controls.target.copy(center);
